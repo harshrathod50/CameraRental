@@ -123,6 +123,27 @@ public class App {
     System.out.printf("\nCAMERA WITH ID %d WAS NOT FOUND!!\n", id);
   }
 
+  private void walletMenu() {
+    System.out.printf("\nCURRENT WALLET BALANCE: %f\n", this.user.getWallet().getBalance());
+    System.out.println("DO YOU WANT TO DEPOSIT:");
+    System.out.println("1. YES");
+    System.out.println("2. NO");
+    int option = Integer.parseInt(this.scanner.nextLine());
+    if (option == 1) {
+      System.out.print("\nDEPOSIT AMOUNT: ");
+      double amount = Double.parseDouble(this.scanner.nextLine());
+      if (amount > 0.0) {
+        Wallet w = this.user.getWallet();
+        w.setBalance(w.getBalance() + amount);
+        System.out.println("\nAMOUNT DEPOSITED!!\n");
+        this.walletMenu();
+      } else {
+        System.out.println("\nINVALID AMOUNT!!\n");
+        this.walletMenu();
+      }
+    }
+  }
+
   private void mainMenu() {
     System.out.println("\n1. MY CAMERA");
     System.out.println("2. RENT A CAMERA");
@@ -141,7 +162,8 @@ public class App {
         this.mainMenu();
       }
       case 4 -> {
-
+        this.walletMenu();
+        this.mainMenu();
       }
       case 5 -> System.out.println("\nBYE!!");
     }
