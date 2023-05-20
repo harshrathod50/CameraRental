@@ -1,5 +1,6 @@
 package io.rentmycam;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
@@ -14,7 +15,7 @@ public class App {
   private User user;
 
   private App() {
-    this.cameraList = Arrays.asList(
+    this.cameraList = new ArrayList<Camera>(List.of(
       new Camera(1, "Samsung", "DS123", 500, "Available"),
       new Camera(2, "Sony", "HDS214", 500, "Available"),
       new Camera(3, "Panasonic", "XC", 500, "Available"),
@@ -31,42 +32,118 @@ public class App {
       new Camera(14, "Sony", "SONY1234", 123, "Available"),
       new Camera(15, "Canon", "5050", 25000, "Available"),
       new Camera(16, "Nikon", "2030", 500, "Available")
-    );
-    this.user = new User(1, "admin", "admin123", new Wallet(500000));
+    ));
+    this.user = new User(1, "admin", "admin123", new Wallet(50));
     this.scanner = new Scanner(System.in);
   }
 
+  private void listAllCameras() {
+    System.out.println("\nFOLLOWING IS THE LIST OF ALL CAMERA(S)");
+    System.out.println("=========================================================================================");
+    System.out.println("ID\t\t\t\tBRAND\t\t\t\tMODEL\t\t\t\tPRICE(PER DAY)\t\t\t\tSTATUS");
+    System.out.println("=========================================================================================");
+    for (Camera c: this.cameraList) {
+      System.out.printf(
+              "%s\t\t\t\t%s\t\t\t\t%s\t\t\t\t%s\t\t\t\t%s\n",
+              c.getId(), c.getBrand(), c.getModel(), c.getPrice(), c.getStatus()
+      );
+    }
+    System.out.println("=========================================================================================\n");
+  }
+
+  private void myCameraMenu() {
+    System.out.println("\n1. ADD");
+    System.out.println("2. REMOVE");
+    System.out.println("3. VIEW");
+    System.out.println("4. MAIN MENU");
+    int option = Integer.parseInt(this.scanner.nextLine());
+    switch (option) {
+      case 1 -> {
+        System.out.print("BRAND NAME: ");
+        String b = this.scanner.nextLine();
+        System.out.print("MODEL: ");
+        String m = this.scanner.nextLine();
+        System.out.print("PRICE PER DAY: ");
+        double p = Double.parseDouble(this.scanner.nextLine());
+        this.cameraList.add(new Camera(this.cameraList.size() + 1, b, m, p, "Available"));
+        System.out.println("\nCAMERA ADDED!!\n");
+        this.myCameraMenu();
+      }
+      case 2 -> {
+        System.out.print("CAMERA ID: ");
+        int id = Integer.parseInt(this.scanner.nextLine());
+        for (int i = 0; i < this.cameraList.size(); ++i) {
+          if (this.cameraList.get(i).getId() == id) {
+            this.cameraList.remove(i);
+            System.out.printf("\nCAMERA WITH %d HAS BEEN REMOVED!!\n", id);
+            this.myCameraMenu();
+          }
+        }
+        System.out.printf("\nCAMERA WITH ID %d WAS NOT FOUND!!\n", id);
+        this.myCameraMenu();
+      }
+      case 3 -> {
+        this.listAllCameras();
+        this.myCameraMenu();
+      }
+      case 4 -> this.mainMenu();
+    }
+  }
+
+  private void rentCameraMenu() {
+    System.out.println("\nFOLLOWING IS THE LIST OF AVAILABLE CAMERA(S)");
+    System.out.println("=========================================================================================");
+    System.out.println("ID\t\t\t\tBRAND\t\t\t\tMODEL\t\t\t\tPRICE(PER DAY)\t\t\t\tSTATUS");
+    System.out.println("=========================================================================================");
+    this.cameraList.forEach((Camera c) -> {
+      if (c.getStatus().equals("Available")) {
+        System.out.printf(
+                "%s\t\t\t\t%s\t\t\t\t%s\t\t\t\t%s\t\t\t\t%s\n",
+                c.getId(), c.getBrand(), c.getModel(), c.getPrice(), c.getStatus()
+        );
+      }
+    });
+    System.out.println("=========================================================================================");
+    System.out.print("RENT CAMERA ID: ");
+    int id = Integer.parseInt(this.scanner.nextLine());
+    for (int i = 0; i < this.cameraList.size(); ++i) {
+      Camera c = this.cameraList.get(i);
+      if (id == c.getId()) {
+        double t = this.user.getWallet().getBalance() - c.getPrice();
+        if (t > 0) {
+          c.setStatus("Rented");
+          this.user.getWallet().setBalance(t);
+          System.out.println("\nTRANSACTION SUCCESSFUL!!\n");
+        } else {
+          System.out.println("\nTRANSACTION FAILED!! INSUFFICIENT BALANCE!!\n");
+          return;
+        }
+      }
+    }
+    System.out.printf("\nCAMERA WITH ID %d WAS NOT FOUND!!\n", id);
+  }
+
   private void mainMenu() {
-    System.out.println("1. MY CAMERA");
+    System.out.println("\n1. MY CAMERA");
     System.out.println("2. RENT A CAMERA");
     System.out.println("3. VIEW ALL CAMERA");
     System.out.println("4. MY WALLET");
     System.out.println("5. EXIT");
     int option = Integer.parseInt(this.scanner.nextLine());
     switch (option) {
-      case 1 -> {
-
-      }
+      case 1 -> this.myCameraMenu();
       case 2 -> {
-
+        this.rentCameraMenu();
+        this.mainMenu();
       }
       case 3 -> {
-        System.out.println("FOLLOWING IS THE LIST OF ALL CAMERA(S)");
-        System.out.println("=========================================================================================");
-        System.out.println("ID\t\t\t\tBRAND\t\t\t\tMODEL\t\t\t\tPRICE(PER DAY)\t\t\t\tSTATUS");
-        System.out.println("=========================================================================================");
-        for (Camera c: this.cameraList) {
-          System.out.printf(
-            "%s\t\t\t\t%s\t\t\t\t%s\t\t\t\t%s\t\t\t\t%s\n",
-            c.getId(), c.getBrand(), c.getModel(), c.getPrice(), c.getStatus()
-          );
-        }
-        System.out.println("=========================================================================================");
+        this.listAllCameras();
+        this.mainMenu();
       }
       case 4 -> {
 
       }
-      case 5 -> System.out.println("BYE!!");
+      case 5 -> System.out.println("\nBYE!!");
     }
   }
 
